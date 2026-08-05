@@ -1,6 +1,6 @@
 # Skill format specification (v1)
 
-A skill is a folder named in kebab-case containing at least `SKILL.md`.
+A skill is a single markdown file named in kebab-case after the skill itself, placed in its category folder: `skills/<category>/<skill-name>.md`. With hundreds of skills per category ahead, identifying filenames are the rule — a repository of files all named SKILL.md is unsearchable.
 
 ## SKILL.md
 

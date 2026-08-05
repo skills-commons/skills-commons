@@ -1,0 +1,91 @@
+name: DCO
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  signed-off-by:
+    name: Every commit is signed off
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify sign-off
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -uo pipefail
+
+          # Compare against the merge base, not the base tip: the base branch
+          # can move after the PR opens, and those commits are not ours to check.
+          merge_base="$(git merge-base "$BASE" "$HEAD_SHA")"
+          commits="$(git log --no-merges --format='%H' "${merge_base}..${HEAD_SHA}")"
+
+          if [ -z "$commits" ]; then
+            echo "No non-merge commits in this pull request."
+            exit 0
+          fi
+
+          failed=0
+
+          for sha in $commits; do
+            short="$(git log -1 --format='%h' "$sha")"
+            subject="$(git log -1 --format='%s' "$sha")"
+            author_email="$(git log -1 --format='%ae' "$sha" | tr '[:upper:]' '[:lower:]')"
+            committer_email="$(git log -1 --format='%ce' "$sha" | tr '[:upper:]' '[:lower:]')"
+
+            signoffs="$(git log -1 --format='%B' "$sha" \
+              | grep -iE '^[[:space:]]*Signed-off-by:[[:space:]]*.+<.+@.+>[[:space:]]*$' \
+              | sed -E 's/.*<(.+)>.*/\1/' \
+              | tr '[:upper:]' '[:lower:]')" || true
+
+            if [ -z "$signoffs" ]; then
+              echo "::error::${short} (\"${subject}\") has no Signed-off-by line."
+              failed=1
+              continue
+            fi
+
+            matched=0
+            for email in $signoffs; do
+              if [ "$email" = "$author_email" ] || [ "$email" = "$committer_email" ]; then
+                matched=1
+                break
+              fi
+            done
+
+            if [ "$matched" -eq 1 ]; then
+              echo "ok  ${short}  ${subject}"
+            else
+              echo "::error::${short} (\"${subject}\") is signed off by a different identity than its author (${author_email})."
+              failed=1
+            fi
+          done
+
+          if [ "$failed" -ne 0 ]; then
+            cat <<'EOF'
+
+          ── How to fix ──────────────────────────────────────────────
+
+          Every commit needs a Signed-off-by line matching its author.
+          It certifies you have the right to contribute the work under
+          Apache-2.0 — see DCO.txt and CONTRIBUTING.md.
+
+          Sign off from now on:      git commit -s
+          Fix the last commit:       git commit --amend -s --no-edit
+          Fix every commit in a PR:  git rebase --signoff <base-branch>
+
+          Then push:                 git push --force-with-lease
+
+          ────────────────────────────────────────────────────────────
+          EOF
+            exit 1
+          fi
+
+          echo "All commits signed off."
