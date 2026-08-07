@@ -31,6 +31,24 @@ content that needs credentials to demonstrate.
 - **Tested**: you ran it at least once on a real case and the PR
   description says what happened.
 
+## Check the structure before you open the PR
+
+```
+pip install pyyaml
+python tools/skill_lint.py
+```
+
+It checks what can be checked mechanically: frontmatter, the required
+sections, `name` against the filename, counts that contradict themselves,
+invisible characters, encoded blobs. It runs on every pull request and
+reports inline.
+
+What it deliberately does not do is judge your method. Whether a step is
+decidable, whether the description states a usable trigger, whether the
+skill says what to do when it cannot know — those are read by a human,
+because a keyword count gets them wrong. An all-clear here means the file
+is well-formed, nothing more.
+
 ## Sign your commits (DCO)
 
 Every commit needs a `Signed-off-by` line. Add it automatically:

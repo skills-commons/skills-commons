@@ -1,0 +1,44 @@
+name: Skill lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  structure:
+    name: Structural checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+
+      # The whole library is linted, not just the diff: duplicate-name
+      # detection needs every file, and 22 files cost nothing.
+      - name: Check every skill file
+        id: lint
+        run: python tools/skill_lint.py --annotate --report=skill-lint.md
+
+      # Best effort: on a pull request from a fork the token is read-only and
+      # this step cannot comment. The job summary and the inline annotations
+      # carry the same findings either way.
+      - name: Post the report on the pull request
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR" --body-file skill-lint.md --edit-last \
+            || gh pr comment "$PR" --body-file skill-lint.md
