@@ -56,6 +56,8 @@ Skills are written model-agnostic on purpose: they name capabilities
 
 ## Contributing
 
+New to the craft? Start with [Write Your First Skill](https://skills-commons.org/write/) — anatomy, a reviewed example, and an editor that generates a conformant file.
+
 Contributions are welcome and reviewed seriously — read
 [CONTRIBUTING.md](CONTRIBUTING.md) first. The review is the product: a
 merge here means someone checked your skill line by line.
