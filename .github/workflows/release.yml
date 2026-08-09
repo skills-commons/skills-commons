@@ -1,0 +1,86 @@
+name: Release
+
+# Tagging publishes the installable library. The workflow artifact from a
+# normal push expires and needs a login to fetch; a release asset does not,
+# which is the difference between a build and something people can use.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish the installable tree
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+
+      - name: Check every skill file
+        run: python tools/skill_lint.py
+
+      - name: Build the spec-conformant tree
+        run: python tools/build_dist.py
+
+      - name: Check the built tree against the Agent Skills spec
+        run: python tools/skill_lint.py --spec-only $(find dist -name SKILL.md)
+
+      - name: Package
+        id: package
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          count=$(find dist -name SKILL.md | wc -l)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          cp LICENSE dist/LICENSE
+          ( cd dist && zip -qr "../skills-commons-${TAG}.zip" . )
+          ( cd dist && tar -czf "../skills-commons-${TAG}.tar.gz" . )
+          ls -la skills-commons-${TAG}.*
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          COUNT: ${{ steps.package.outputs.count }}
+        run: |
+          cat > notes.md <<EOF
+          **${COUNT} reviewed skills**, packaged in the layout the
+          [Agent Skills specification](https://agentskills.io/specification)
+          expects: one directory per skill, each holding its \`SKILL.md\`.
+
+          ## Install one skill
+
+          Download and unzip, then copy the folder you want into your
+          assistant's skills directory:
+
+          \`\`\`
+          cp -r skills-commons-${TAG}/engineering/commit-message-pro ~/.claude/skills/
+          \`\`\`
+
+          Ask for the task; the skill states its own inputs and output format.
+
+          ## Install all of them
+
+          \`\`\`
+          cp -r skills-commons-${TAG}/*/* ~/.claude/skills/
+          \`\`\`
+
+          Every file here is plain markdown you can read before you run it,
+          and every one passed the review in
+          [SECURITY.md](https://github.com/skills-commons/skills-commons/blob/main/SECURITY.md).
+          Apache-2.0 — keep the notice.
+          EOF
+          gh release create "$TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Skills Commons $TAG" \
+            --notes-file notes.md \
+            "skills-commons-${TAG}.zip" \
+            "skills-commons-${TAG}.tar.gz"
