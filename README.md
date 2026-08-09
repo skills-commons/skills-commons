@@ -13,9 +13,19 @@ with any capable assistant that follows natural-language instructions.
 
 Open skill collections already exist, and they are large. What the
 ecosystem lacks is a library you can install from with your eyes closed.
-Public skill hubs have already shipped malware disguised as utility
-skills; a skill file is an unsigned set of instructions your agent will
-follow. This library exists to be the opposite of that:
+
+The gap is measured. Scanning 3,984 skills across two public hubs on
+5 February 2026, [Snyk found](https://snyk.io/blog/toxicskills-malicious-ai-agent-skills-clawhub/)
+that 36.82% carried at least one security flaw and 13.4% at least one
+critical issue, alongside 76 payloads built for credential theft,
+backdoors and exfiltration. The first systematic security analysis of the
+format, [Towards Secure Agent Skills](https://arxiv.org/abs/2604.02837)
+(Li, Wu, Ling, Cui and Luo, April 2026), names *the absence of mandatory
+marketplace security review* as one of three architectural weaknesses
+behind the worst of those threats.
+
+A skill file is an unsigned set of instructions your agent runs with your
+permissions. This library exists to be the opposite of that:
 
 - **Reviewed**: every skill is checked against the [security
   checklist](SECURITY.md) and the [quality bar](CONTRIBUTING.md) before
@@ -53,6 +63,34 @@ One skill = one markdown file, named after itself, in its category:
 
 Skills are written model-agnostic on purpose: they name capabilities
 ("when code execution is available"), never one vendor's tool names.
+
+### Or skip the folder-making
+
+The library is stored one file per skill because that keeps diffs
+readable and review honest. The [Agent Skills
+specification](https://agentskills.io/specification) instead defines a
+skill as a *directory* containing `SKILL.md`, with `name` matching that
+directory. Both shapes ship:
+
+```
+python tools/build_dist.py     # -> dist/<category>/<name>/SKILL.md
+```
+
+The built tree is spec-shaped — `version` and `authors` move under
+`metadata`, where the spec puts fields it does not define — so installing
+is copying one folder. Every push builds it in CI and attaches it as the
+`skills-spec-tree` artifact.
+
+## Tools
+
+| Command | What it does |
+|---|---|
+| `python tools/skill_lint.py` | Structural checks against SPEC.md and SECURITY.md. Runs on every PR. |
+| `python tools/skill_lint.py --spec-only` | Only the Agent Skills spec and the safety checks — usable on any skill, ours or not. |
+| `python tools/build_dist.py` | Builds the installable, spec-conformant tree. |
+| `python tools/compare_corpus.py` | Measures this library against [anthropics/skills](https://github.com/anthropics/skills) on shared ground, and reports the licence each of those skills actually carries. |
+
+All four need only `pyyaml`.
 
 ## Contributing
 

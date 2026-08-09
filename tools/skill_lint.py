@@ -30,6 +30,7 @@ except ImportError:
 
 CATEGORIES = {"agents", "engineering", "workplace", "writing"}
 REQUIRED_KEYS = ["name", "description", "version", "license"]
+SPEC_KEYS = ["name", "description"]  # Agent Skills specification minimum
 REQUIRED_SECTIONS = ["Inputs", "Method", "Output format", "Rules"]
 
 KEBAB = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -48,9 +49,19 @@ NUMBERED = re.compile(r"^(\d+)\.\s+\S", re.M)
 
 
 class Report:
-    def __init__(self, path: str):
+    """Findings for one file.
+
+    Two rule sets live here. The Agent Skills specification
+    (https://agentskills.io/specification) applies to any skill anywhere;
+    the house rules come from this library's own SPEC.md. `spec_only`
+    keeps the second set quiet so an outside corpus can be measured on the
+    same terms as ours.
+    """
+
+    def __init__(self, path: str, spec_only: bool = False):
         # Forward slashes so GitHub annotations resolve on every runner.
         self.path = path.replace("\\", "/")
+        self.spec_only = spec_only
         self.findings: list[tuple[str, str, str, int | None]] = []
 
     def error(self, code, msg, line=None):
@@ -58,6 +69,14 @@ class Report:
 
     def warn(self, code, msg, line=None):
         self.findings.append(("warn", code, msg, line))
+
+    def house_error(self, code, msg, line=None):
+        if not self.spec_only:
+            self.error(code, msg, line)
+
+    def house_warn(self, code, msg, line=None):
+        if not self.spec_only:
+            self.warn(code, msg, line)
 
     @property
     def errors(self):
@@ -97,11 +116,11 @@ def check_path(path: str, rep: Report) -> str | None:
     norm = path.replace("\\", "/")
     m = re.search(r"skills/([^/]+)/([^/]+)\.md$", norm)
     if not m:
-        rep.error("P001", "File must live at skills/<category>/<name>.md")
+        rep.house_error("P001", "File must live at skills/<category>/<name>.md")
         return None
     category, stem = m.group(1), m.group(2)
     if category not in CATEGORIES:
-        rep.error(
+        rep.house_error(
             "P002",
             f"Unknown category '{category}' — expected one of "
             + ", ".join(sorted(CATEGORIES))
@@ -124,7 +143,8 @@ def check_frontmatter(fm: str | None, stem: str | None, text: str, rep: Report):
         rep.error("F002", "Frontmatter must be a mapping of keys to values", 1)
         return None
 
-    for key in REQUIRED_KEYS:
+    keys = SPEC_KEYS if rep.spec_only else REQUIRED_KEYS
+    for key in keys:
         if key not in data or data[key] in (None, ""):
             rep.error("F003", f"Frontmatter is missing '{key}'")
 
@@ -132,27 +152,31 @@ def check_frontmatter(fm: str | None, stem: str | None, text: str, rep: Report):
     if isinstance(name, str):
         if not KEBAB.match(name):
             rep.error("F004", f"name '{name}' must be kebab-case: a-z, 0-9 and single hyphens")
-        elif stem and name != stem:
+        elif stem and name != stem and not rep.spec_only:
             rep.error("F005", f"name '{name}' must match the filename '{stem}.md'")
+        if len(name) > 64:
+            rep.error("F010", f"name is {len(name)} characters; the Agent Skills spec caps it at 64")
     elif name is not None:
         rep.error("F004", "name must be a string")
 
     version = data.get("version")
     if version is not None:
         if not isinstance(version, str):
-            rep.error("F006", f"version must be a quoted string, e.g. \"1.0.0\" (got {version!r})")
+            rep.house_error("F006", f"version must be a quoted string, e.g. \"1.0.0\" (got {version!r})")
         elif not SEMVER.match(version):
-            rep.error("F006", f"version '{version}' is not semver (major.minor.patch)")
+            rep.house_error("F006", f"version '{version}' is not semver (major.minor.patch)")
 
     lic = data.get("license")
     if lic is not None and lic != "Apache-2.0":
-        rep.warn("F007", f"license is '{lic}'; the library ships Apache-2.0")
+        rep.house_warn("F007", f"license is '{lic}'; the library ships Apache-2.0")
 
     desc = data.get("description")
     if isinstance(desc, str) and desc.strip():
         flat = " ".join(desc.split())
+        if len(flat) > 1024:
+            rep.error("F011", f"description is {len(flat)} characters; the Agent Skills spec caps it at 1024")
         if len(flat) < 60:
-            rep.warn("F008", f"description is {len(flat)} characters — say what it does and when to use it")
+            rep.house_warn("F008", f"description is {len(flat)} characters — say what it does and when to use it")
         # Whether the description states a usable trigger is a semantic property.
         # A check for the literal word "when" flags every skill written as
         # "Use for ..." — which is most of this library. Left to human review.
@@ -161,37 +185,37 @@ def check_frontmatter(fm: str | None, stem: str | None, text: str, rep: Report):
 
 def check_body(body: str, offset: int, text: str, rep: Report):
     if not re.search(r"^# +\S", body, re.M):
-        rep.error("B001", "No '# Title' heading after the frontmatter")
+        rep.house_error("B001", "No '# Title' heading after the frontmatter")
 
     found = sections(body)
     for want in REQUIRED_SECTIONS:
         match = next((k for k in found if k.lower() == want.lower()), None)
         if match is None:
-            rep.error("B002", f"Missing required section '## {want}' (SPEC.md)")
+            rep.house_error("B002", f"Missing required section '## {want}' (SPEC.md)")
         elif not found[match].strip():
-            rep.error("B003", f"Section '## {match}' is empty")
+            rep.house_error("B003", f"Section '## {match}' is empty")
 
     words = len(body.split())
     if words < 150:
-        rep.warn("B004", f"{words} words — likely under-specified for a reviewable method")
+        rep.house_warn("B004", f"{words} words — likely under-specified for a reviewable method")
     elif words > 1500:
-        rep.warn("B004", f"{words} words — long enough that instructions start competing")
+        rep.house_warn("B004", f"{words} words — long enough that instructions start competing")
 
     method_key = next((k for k in found if k.lower() == "method"), None)
     steps = []
     if method_key:
         steps = NUMBERED.findall(found[method_key])
         if not steps:
-            rep.warn("B005", "Method has no numbered steps — SPEC.md asks for numbered steps or checks")
+            rep.house_warn("B005", "Method has no numbered steps — SPEC.md asks for numbered steps or checks")
         else:
             numbers = [int(n) for n in steps]
             if numbers != list(range(1, len(numbers) + 1)):
-                rep.warn("B006", f"Method numbering runs {numbers} — expected 1..{len(numbers)}")
+                rep.house_warn("B006", f"Method numbering runs {numbers} — expected 1..{len(numbers)}")
 
     for m in DECLARED_STEPS.finditer(body):
         declared = int(m.group(1))
         if steps and declared != len(steps):
-            rep.warn(
+            rep.house_warn(
                 "C001",
                 f"Text says '{m.group(0)}' but Method lists {len(steps)} — "
                 "confirm the count refers to something else",
@@ -245,8 +269,8 @@ def check_inputs_for_credentials(found: dict[str, str], body: str, offset: int, 
         )
 
 
-def lint(path: str) -> Report:
-    rep = Report(path)
+def lint(path: str, spec_only: bool = False) -> Report:
+    rep = Report(path, spec_only)
     with open(path, encoding="utf-8") as fh:
         text = fh.read()
     stem = check_path(path, rep)
@@ -270,14 +294,15 @@ def main(argv: list[str]) -> int:
         print("No skill files found.")
         return 0
 
-    reports = [lint(p) for p in paths]
+    spec_only = "--spec-only" in argv
+    reports = [lint(p, spec_only) for p in paths]
 
     seen: dict[str, str] = {}
     for rep in reports:
         name = getattr(rep, "name", None)
         if isinstance(name, str):
             if name in seen:
-                rep.error("X001", f"Duplicate skill name '{name}', already used by {seen[name]}")
+                rep.house_error("X001", f"Duplicate skill name '{name}', already used by {seen[name]}")
             else:
                 seen[name] = rep.path
 
