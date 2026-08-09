@@ -1,0 +1,9 @@
+- call vendor re: pricing
+- dark mode??
+- ana said the invoice thing is broken again
+- book flights milan
+- check if we still pay for the old analytics tool
+- SSO bug -> enterprise deal
+- ask legal about disclaimer
+- q3 budget 12k approved? pending cfo
+- someone owns the runbook

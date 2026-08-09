@@ -89,8 +89,45 @@ is copying one folder. Every push builds it in CI and attaches it as the
 | `python tools/skill_lint.py --spec-only` | Only the Agent Skills spec and the safety checks — usable on any skill, ours or not. |
 | `python tools/build_dist.py` | Builds the installable, spec-conformant tree. |
 | `python tools/compare_corpus.py` | Measures this library against [anthropics/skills](https://github.com/anthropics/skills) on shared ground, and reports the licence each of those skills actually carries. |
+| `python tools/repeatability.py` | Runs each skill several times on a frozen input and measures how much the outputs agree. Needs API credentials; `--self-test` and `--dry-run` do not. |
 
-All four need only `pyyaml`.
+The first four need only `pyyaml`.
+
+### Repeatability
+
+Structural checks say a file is well-formed. They say nothing about the
+question that actually matters to someone installing it: *will this
+produce the same work twice?*
+
+`tools/repeatability.py` answers it by measurement. Each skill runs
+several times against a frozen input in [`tests/fixtures/`](tests/fixtures/),
+and the outputs are compared to each other:
+
+| Number | Reads as |
+|---|---|
+| `structure` | agreement on the shape — headings, labels, table columns |
+| `content` | agreement on the words, over 3-word shingles |
+| `length cv` / `items cv` | how much the volume moves between runs |
+
+They stay separate on purpose. High structure with low content is the
+interesting case: the deliverable's shape is pinned and its substance is
+being improvised — which is exactly where a reader gets a confident
+answer that was invented.
+
+**This measures repeatability, not correctness.** A skill can be
+consistently wrong and score 1.00. What it does measure is how much of
+the work the file decided, and how much it left to the model.
+
+```
+python tools/repeatability.py --self-test   # validates the metric, no API
+python tools/repeatability.py --dry-run     # shows the plan and the call count
+python tools/repeatability.py --runs 3      # measures
+```
+
+Results depend on the model and effort used, so both are recorded in the
+output alongside the numbers. Server-side fallback is deliberately off:
+answering with a substitute model mid-run would make one number describe
+two models.
 
 ## Contributing
 
