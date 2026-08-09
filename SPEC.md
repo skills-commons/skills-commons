@@ -2,13 +2,18 @@
 
 A skill is a single markdown file named in kebab-case after the skill itself, placed in its category folder: `skills/<category>/<skill-name>.md`. With hundreds of skills per category ahead, identifying filenames are the rule — a repository of files all named SKILL.md is unsearchable.
 
-## SKILL.md
+The [Agent Skills specification](https://agentskills.io/specification)
+instead defines a skill as a directory holding a `SKILL.md`. Both shapes
+ship: `tools/build_dist.py` converts this one into that one, so the
+source stays searchable and the artefact stays installable.
+
+## The file
 
 YAML frontmatter, then the method in markdown:
 
 ```markdown
 ---
-name: my-skill-name            # kebab-case, matches the folder
+name: my-skill-name            # kebab-case, matches the filename
 description: >-                # third person; states WHEN to use it
   One or two sentences. "Use when ..." triggers help assistants
   activate the skill at the right time.
@@ -48,9 +53,15 @@ Hard constraints, stated once, at the end.
 5. **No secrets handling**: skills never ask users for credentials, API
    keys, or personal data beyond what the task strictly needs.
 6. **English body** for the library (assistants localize output);
-   translated variants are welcome as `SKILL.<lang>.md` alongside.
+   translated variants are welcome as `<skill-name>.<lang>.md` beside the
+   original.
 
-## Optional files
+## Companion files
 
-- `README.md` — usage notes, examples of invocation.
-- `CHANGELOG.md` — required from the first change after 1.0.0.
+The layout is flat, so a skill has no folder of its own to put things in.
+Companions carry the skill's name and say what they are:
+
+- `<skill-name>.CHANGELOG.md` — required from the first change after
+  1.0.0, beside the skill it describes.
+- Usage notes and invocation examples belong inside the skill file, not
+  in a separate README.
