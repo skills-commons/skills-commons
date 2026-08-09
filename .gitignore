@@ -1,0 +1,5 @@
+# Built by tools/build_dist.py — the installable, spec-conformant tree.
+dist/
+
+__pycache__/
+*.pyc

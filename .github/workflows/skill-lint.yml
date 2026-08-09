@@ -30,6 +30,23 @@ jobs:
         id: lint
         run: python tools/skill_lint.py --annotate --report=skill-lint.md
 
+      # The library is stored flat; the specification wants a directory per
+      # skill. Building it here keeps the two from drifting apart.
+      - name: Build the spec-conformant tree
+        if: always()
+        run: python tools/build_dist.py
+
+      - name: Check the built tree against the Agent Skills spec
+        if: always()
+        run: python tools/skill_lint.py --spec-only $(find dist -name SKILL.md)
+
+      - name: Upload the installable tree
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skills-spec-tree
+          path: dist/
+
       # Best effort: on a pull request from a fork the token is read-only and
       # this step cannot comment. The job summary and the inline annotations
       # carry the same findings either way.
