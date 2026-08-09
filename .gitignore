@@ -1,5 +1,8 @@
 # Built by tools/build_dist.py — the installable, spec-conformant tree.
 dist/
 
+# Written by tools/repeatability.py; results depend on model and date.
+repeatability.json
+
 __pycache__/
 *.pyc
