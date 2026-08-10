@@ -31,7 +31,7 @@ submissions get reviewed by a different maintainer.
 ## Reporting a vulnerability
 
 Found a malicious pattern, an injection vector, or a dangerous
-instruction in a merged skill? Open a private report on GitHub (Security tab, "Report a vulnerability") or email **hello@kaimakiweb.com** with subject `[skills-commons security]`. We acknowledge within 72 hours. Confirmed
+instruction in a merged skill? Open a private report on GitHub (Security tab, "Report a vulnerability") or email **hello@agora-intelligence.com** with subject `[skills-commons security]`. We acknowledge within 72 hours. Confirmed
 reports lead to immediate skill removal, a public advisory in the skill's
 folder, and credit to the reporter (with consent).
 
