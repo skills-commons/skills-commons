@@ -24,16 +24,33 @@ quote as if it were the library.
 
 ## How a candidate is promoted
 
-1. It passes `python tools/skill_lint.py` with zero errors.
-2. Someone runs it on a real case and pastes the output in the pull request —
-   a method that has never been executed is a guess with formatting.
-3. A maintainer reads it against [SECURITY.md](../SECURITY.md) and the quality
-   bar in [CONTRIBUTING.md](../CONTRIBUTING.md).
-4. It moves to `skills/<category>/<name>.md` in that pull request, and the
+1. **Structural gate.** `python tools/skill_lint.py` with zero errors.
+2. **Reading gate.** `python tools/review_agent.py` reads it three times with
+   three different lenses and scores six axes. It never approves anything; it
+   rejects, so that step 4 is spent on candidates worth the time.
+3. **Run it on a real case** and paste the output in the pull request. A method
+   that has never been executed is a guess with formatting.
+4. **A maintainer reads it** against [SECURITY.md](../SECURITY.md) and the
+   quality bar in [CONTRIBUTING.md](../CONTRIBUTING.md).
+5. It moves to `skills/<category>/<name>.md` in that pull request, and the
    candidate file is deleted in the same commit.
 
-Step 2 is the one that catches what neither automation nor a careful read
-will: a method that looks rigorous and produces nothing useful.
+Step 3 catches what neither the machine nor a careful read will: a method that
+looks rigorous and produces nothing useful.
+
+## The axis that decides whether this library stays worth using
+
+Of the six the agent scores, `non_obvious` is the one that matters most:
+
+> does this encode judgment a competent person needs experience to have, or
+> could anyone arrive here unaided?
+
+A candidate scoring 2 or below is rejected even when everything else is
+perfect. A method anyone would improvise adds a file and subtracts attention
+from the ones worth reading — and a library of those is exactly what already
+exists elsewhere, in the thousands.
+
+Fewer and sharper is the whole strategy. Volume is available to anyone.
 
 ## Rejecting is normal
 
