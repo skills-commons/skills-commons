@@ -25,8 +25,23 @@ Reviewers check, line by line:
 6. **Self-consistency** — declared counts, referenced sections and output
    formats match the actual text (drift hides tampering).
 
-Merges require an approving review from a maintainer. Maintainer
-submissions get reviewed by a different maintainer.
+## How a merge actually happens
+
+Two gates, in this order, both visible in the pull request:
+
+1. **Automated, blocking.** `tools/skill_lint.py` checks structure,
+   self-consistency, encoded content, invisible characters and credential
+   requests; the DCO check verifies every commit is signed off. Neither can
+   be skipped, and both report publicly.
+2. **A person reads the file, line by line**, against the checklist above.
+   Nothing merges on automation alone.
+
+The maintainers are the AGORÀ Intelligence team, and today that team is
+small. We say so rather than imply a review board that does not exist: the
+automated gates are what scale, the reading is what does not, and review
+capacity is the constraint we grow deliberately. When a second maintainer is
+in place, submissions by one will require the approval of another, enforced
+by branch protection rather than promised here.
 
 ## Reporting a vulnerability
 

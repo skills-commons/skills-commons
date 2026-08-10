@@ -17,8 +17,9 @@ content that needs credentials to demonstrate.
 2. One skill per pull request, as `skills/<category>/<your-skill-name>.md` (categories: workplace, writing, engineering, agents — propose a new one in the PR when yours fits none).
 3. Fill the PR template checklist (it mirrors [SECURITY.md](SECURITY.md)).
 4. Expect real review: questions about ambiguous steps, requests to count
-   your own checklist, pushback on vague verbs. Two passing reviews
-   (quality + security) merge it.
+   your own checklist, pushback on vague verbs. The automated checks must
+   pass, and then a maintainer reads the file line by line. Both happen in
+   the pull request, where anyone can see how deep the reading went.
 
 ## The quality bar
 
