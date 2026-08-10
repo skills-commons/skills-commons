@@ -89,6 +89,7 @@ is copying one folder. Every push builds it in CI and attaches it as the
 | `python tools/skill_lint.py --spec-only` | Only the Agent Skills spec and the safety checks — usable on any skill, ours or not. |
 | `python tools/build_dist.py` | Builds the installable, spec-conformant tree. |
 | `python tools/compare_corpus.py` | Measures this library against [anthropics/skills](https://github.com/anthropics/skills) on shared ground, and reports the licence each of those skills actually carries. |
+| `python tools/review_agent.py` | Reads each candidate three times with three different lenses, scores six axes, and rejects what a person should not spend time on. Never approves. Needs API credentials; `--rubric` and `--dry-run` do not. |
 | `python tools/repeatability.py` | Runs each skill several times on a frozen input and measures how much the outputs agree. Needs API credentials; `--self-test` and `--dry-run` do not. |
 
 The first four need only `pyyaml`.
