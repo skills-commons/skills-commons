@@ -47,7 +47,37 @@ One skill = one markdown file, named after itself, in its category:
 | [`engineering/`](skills/engineering/) | bug-report-pro · changelog-writer · commit-message-pro · dependency-update-brief · issue-triage-pro · pr-description-writer · readme-architect · release-notes-writer · sql-query-reviewer · stack-trace-explainer |
 | [`agents/`](skills/agents/) | honest-status-report · session-summary-writer · task-handoff-brief · tool-failure-triage |
 
-**22 skills**, every one merged through the same two-review gate.
+**22 skills**, every one read line by line before it merged.
+
+All 22 were written by AGORÀ Intelligence to seed the library. That is a
+starting point, not the destination — see below.
+
+## Wanted
+
+**This library is deliberately small, and stays that way.** The ceiling is
+around a hundred skills, not thousands. A collection nobody can read through
+is a collection nobody checked, and there are already several of those.
+
+So the interesting number here is not what exists. It is what is missing:
+
+### → [100 skills we want and do not have](candidates/TOPICS.md)
+
+Pick one. The list is weighted toward the categories this library is thinnest
+in — `writing/` has two skills today against ten in `engineering/` — and each
+entry says in one line what the skill should do.
+
+You do not need permission and you do not need to be first. If a topic is
+already drafted in [`candidates/`](candidates/), the draft has still not been
+read by anyone; a better version replaces it.
+
+**The one number worth watching:** every skill here is currently authored by
+the same team. The first skill merged from outside is what turns a company's
+open catalogue into a commons, and it is worth more to this project than the
+next fifty we write ourselves.
+
+Start with [Write Your First Skill](https://skills-commons.org/write/) —
+anatomy, a reviewed example, the mistakes reviews reject, and a browser editor
+that generates a conformant file.
 
 ## Using a skill
 
@@ -132,21 +162,40 @@ two models.
 
 ## Contributing
 
-New to the craft? Start with [Write Your First Skill](https://skills-commons.org/write/) — anatomy, a reviewed example, and an editor that generates a conformant file.
+Read [CONTRIBUTING.md](CONTRIBUTING.md), take a topic from
+[the wanted list](candidates/TOPICS.md), and open one pull request per skill.
+Two gates, both public in that pull request: the automated checks must pass,
+and then a person reads the file line by line. Credit lands in the skill's own
+frontmatter and stays there.
 
-Contributions are welcome and reviewed seriously — read
-[CONTRIBUTING.md](CONTRIBUTING.md) first. The review is the product: a
-merge here means someone checked your skill line by line.
+Expect the review to argue with you. Vague steps get sent back, missing
+degradation clauses get sent back, and a method with no output contract gets
+sent back. That is the product working — a merge here means something because
+it is possible to fail.
 
 ## Provenance
 
 Seeded and maintained by [AGORÀ Intelligence](https://agora-intelligence.com),
 the team running an autonomous newsroom in production (200+ sourced
 articles, three languages, a weekly print magazine). The seed skills are
-methods we use in real operations, and every merge is reviewed by a
-member of the AGORÀ team. Certified, audited builds and enterprise
-variants live on the [AGORÀ Skills catalog](https://agora-intelligence.com/en/skills/);
-this library is and stays free.
+methods used in real operations, and every merge is read by a member of the
+team.
+
+### What is free, and what is not
+
+Everything AGORÀ writes for this library lands in this library. There is no
+tier where the better version is held back — a method good enough to charge
+for is a method good enough to prove we can do the work, and proving it is
+worth more than the file.
+
+What [AGORÀ](https://agora-intelligence.com/en/skills/) sells is a different
+object, not a better copy of this one: a skill built against one company's
+data, systems, tone and compliance rules; skills that must stay private;
+audits with a name attached; measurement run on your own skills rather than
+ours. A method is a text and texts get copied. An implementation is work, and
+it has to be done again for every organisation.
+
+That line is the reason this library can stay free without being the leftovers.
 
 ## License
 
