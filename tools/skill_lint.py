@@ -46,6 +46,11 @@ CREDENTIAL = re.compile(
 )
 DECLARED_STEPS = re.compile(r"\b(\d+)[- ]steps?\b", re.I)
 NUMBERED = re.compile(r"^(\d+)\.\s+\S", re.M)
+# A skill that writes for publication must say so where the reader can see it.
+# Article 50 is the operative one: it obliges disclosure of AI-generated
+# content. Accept the article cited with or without the act named beside it.
+AI_ACT = re.compile(r"\bart(?:icle)?\.?\s*50\b", re.I)
+AUDIENCES = {"public", "internal"}
 
 
 class Report:
@@ -269,6 +274,47 @@ def check_inputs_for_credentials(found: dict[str, str], body: str, offset: int, 
         )
 
 
+def check_disclosure(data: dict | None, found: dict[str, str], rep: Report):
+    """`audience: public` obliges the skill to carry an AI-authorship notice.
+
+    The field is opt-in and declarative: the author states that the output is
+    destined for publication, and the check follows from that statement. No
+    heuristic guesses at intent — a skill that does not declare `audience` is
+    not second-guessed here.
+    """
+    if not isinstance(data, dict):
+        return
+    audience = data.get("audience")
+    if audience is None:
+        return
+    if audience not in AUDIENCES:
+        rep.house_error(
+            "A001",
+            f"audience is '{audience}' — expected one of " + ", ".join(sorted(AUDIENCES)),
+        )
+        return
+    if audience != "public":
+        return
+
+    key = next((k for k in found if k.lower() == "disclosure"), None)
+    if key is None:
+        rep.house_error(
+            "A002",
+            "audience is 'public' but there is no '## Disclosure' section — output "
+            "written for publication must carry an AI-authorship notice (SPEC.md)",
+        )
+        return
+    if not found[key].strip():
+        rep.house_error("A003", "Section '## Disclosure' is empty")
+        return
+    if not AI_ACT.search(found[key]):
+        rep.house_warn(
+            "A004",
+            "Disclosure does not cite EU AI Act art. 50 — name the obligation so "
+            "the reader can check it",
+        )
+
+
 def lint(path: str, spec_only: bool = False) -> Report:
     rep = Report(path, spec_only)
     with open(path, encoding="utf-8") as fh:
@@ -279,6 +325,7 @@ def lint(path: str, spec_only: bool = False) -> Report:
     found = check_body(body, offset, text, rep)
     check_safety(text, rep)
     check_inputs_for_credentials(found, body, offset, text, rep)
+    check_disclosure(data, found, rep)
     rep.name = (data or {}).get("name")
     return rep
 

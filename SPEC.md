@@ -19,6 +19,7 @@ description: >-                # third person; states WHEN to use it
   activate the skill at the right time.
 version: "1.0.0"               # semver, quoted string
 license: Apache-2.0
+audience: public               # optional; see "Output written for publication"
 ---
 
 # Human-readable title
@@ -55,6 +56,27 @@ Hard constraints, stated once, at the end.
 6. **English body** for the library (assistants localize output);
    translated variants are welcome as `<skill-name>.<lang>.md` beside the
    original.
+7. **Output written for publication declares itself.** A skill whose
+   deliverable is meant to be published — an article, a press release, a
+   product page, a post — sets `audience: public` in the frontmatter and
+   carries a `## Disclosure` section telling the user that the result must
+   be marked as AI-authored, citing **EU AI Act art. 50**. The field is
+   opt-in: a skill that writes for an internal reader sets `audience:
+   internal` or omits the key, and nothing is required of it. What is not
+   negotiable is the pairing — declaring `public` without the section is a
+   lint error, because the claim and the obligation must travel together.
+
+## Output written for publication
+
+Article 50 obliges whoever puts AI-generated content in front of the public
+to say so. A skill cannot enforce that on the person using it, and pretending
+otherwise would be theatre. What it can do is refuse to let the obligation go
+unmentioned: the method that drafts the article is also the place where the
+reader learns the article needs a notice.
+
+The disclosure names an **organisation**, never an invented person. A skill
+that instructs the assistant to sign work with a fictional human byline does
+not merge here.
 
 ## Companion files
 
