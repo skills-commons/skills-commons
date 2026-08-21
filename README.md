@@ -49,9 +49,6 @@ One skill = one markdown file, named after itself, in its category:
 
 **22 skills**, every one read line by line before it merged.
 
-All 22 were written by AGORÀ Intelligence to seed the library. That is a
-starting point, not the destination — see below.
-
 ## Wanted
 
 **This library is deliberately small, and stays that way.** The ceiling is
@@ -70,10 +67,7 @@ You do not need permission and you do not need to be first. If a topic is
 already drafted in [`candidates/`](candidates/), the draft has still not been
 read by anyone; a better version replaces it.
 
-**The one number worth watching:** every skill here is currently authored by
-the same team. The first skill merged from outside is what turns a company's
-open catalogue into a commons, and it is worth more to this project than the
-next fifty we write ourselves.
+Credit lands in the skill's own frontmatter and stays there.
 
 Start with [Write Your First Skill](https://skills-commons.org/write/) —
 anatomy, a reviewed example, the mistakes reviews reject, and a browser editor
