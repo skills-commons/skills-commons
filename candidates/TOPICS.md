@@ -1,11 +1,8 @@
 # The queue — 100 topics
 
-How this list was chosen, stated plainly: these are recurring professional
-tasks people already hand to an assistant, weighted toward the categories the
-library is thinnest in. **It is not measured demand.** Nobody has usage data
-for this library yet, and inventing a ranking would be the same dishonesty the
-project exists to avoid. Once release downloads and install counts accumulate,
-this order should be rewritten from them.
+These are recurring professional tasks people already hand to an assistant,
+weighted toward the categories the library is thinnest in. The order will be
+revised as download and install figures come in.
 
 Current library: 22 skills — engineering 10, workplace 6, agents 4, writing 2.
 The queue deliberately corrects that shape.
@@ -137,5 +134,4 @@ Status: `—` queued · `draft` written, awaiting review · `merged` in the libr
 Writing a skill worth merging takes longer than writing one that looks like a
 skill: a real method, a real case run through it, and a read by someone who
 will argue with it. Ten a week, reviewed, beats a hundred in a day that nobody
-has read — and the second number is the one that would cost the library the
-only thing it sells.
+has read.
