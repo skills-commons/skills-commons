@@ -28,7 +28,7 @@ try:
 except ImportError:
     sys.exit("PyYAML is required: pip install pyyaml")
 
-CATEGORIES = {"agents", "engineering", "workplace", "writing"}
+CATEGORIES = {"agents", "engineering", "marketing", "workplace", "writing"}
 REQUIRED_KEYS = ["name", "description", "version", "license"]
 SPEC_KEYS = ["name", "description"]  # Agent Skills specification minimum
 REQUIRED_SECTIONS = ["Inputs", "Method", "Output format", "Rules"]
